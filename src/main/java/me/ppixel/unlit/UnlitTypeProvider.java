@@ -31,7 +31,7 @@ public class UnlitTypeProvider {
 
         for (var comp : allTemplatableTypes) {
             if (!Component.class.isAssignableFrom(comp)) {
-                // TODO: print warn
+                //TODO: print warn
                 return;
             }
 

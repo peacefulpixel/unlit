@@ -1,15 +1,19 @@
 package me.ppixel.unlit.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
-// TODO: Doc
+/**
+ * Associates annotated class with exact XML template file in the classpath.
+ * A class by itself should always have {@link me.ppixel.unlit.MappedComponent} as a parent, because it handles this
+ * annotation inside its constructor.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Documented
 public @interface MapMarkup {
 
-    // TODO: Doc
+    /**
+     * @return path to XML template file
+     */
     String value();
 }

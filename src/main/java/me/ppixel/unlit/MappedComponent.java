@@ -32,11 +32,9 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
     }
 
     /**
-     * TODO
-     * @param id
-     * @return
-     * @param <T>
-     * @throws ClassCastException e
+     * @return the component by an identifier from template
+     * @param id the identifier
+     * @throws ClassCastException when can't cast a template element to specified type <T>
      */
     protected <T extends Component> T getComponentById(String id) {
         return (T) childrenWithIds.get(id);
