@@ -16,7 +16,6 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -74,8 +73,12 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
     private void handleParameter(Component c, String k, String v) {
 
         if (k.startsWith("_")) {
-            instanceGenerator.initialize(c, k.substring(1), v);
-            return;
+            if (!k.startsWith("__")) {
+                instanceGenerator.initialize(c, k.substring(1), v);
+                return;
+            }
+
+            k = k.substring(1);
         }
 
         if ("id".equals(k))
