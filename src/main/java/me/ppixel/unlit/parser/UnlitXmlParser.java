@@ -1,5 +1,6 @@
 package me.ppixel.unlit.parser;
 
+import com.vaadin.flow.component.Text;
 import me.ppixel.unlit.exception.InvalidSourceException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -43,6 +44,10 @@ public class UnlitXmlParser {
         final var kids = element.getChildNodes();
         for (int x = 0; x < kids.getLength(); x ++) {
             final var item = kids.item(x);
+
+            if (Node.TEXT_NODE == item.getNodeType())
+                processTextNode(el, item);
+
             if (Node.ELEMENT_NODE != item.getNodeType())
                 continue;
 
@@ -51,6 +56,20 @@ public class UnlitXmlParser {
         }
 
         return el;
+    }
+
+    private void processTextNode(UnlitXMLElement parent, Node node) {
+        final var value = node.getTextContent()
+                .replaceAll("^\n*", "")
+                .replaceAll("\n*$", "");
+
+        if (value.isEmpty())
+            return;
+
+        final var text = new UnlitXMLElement();
+        text.type = Text.class.getName();
+        text.parameters.put("_text", value);
+        parent.children.add(text);
     }
 
     private Document sourceToDocument() {
