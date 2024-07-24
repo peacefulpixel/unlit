@@ -1,7 +1,6 @@
 package me.ppixel.unlit;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import me.ppixel.unlit.annotation.TemplatableType;
 import me.ppixel.unlit.exception.UnknownTypeException;
 import org.reflections.Reflections;

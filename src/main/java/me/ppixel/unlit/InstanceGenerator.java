@@ -1,7 +1,8 @@
 package me.ppixel.unlit;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HtmlComponent;
+import com.vaadin.flow.component.HtmlContainer;
+import com.vaadin.flow.component.Text;
 import me.ppixel.unlit.exception.InvalidTypeException;
 import me.ppixel.unlit.exception.MappingException;
 import me.ppixel.unlit.exception.UnknownTypeException;
@@ -25,13 +26,21 @@ public class InstanceGenerator {
                 throw new InvalidTypeException("Unable to instance the type: " + name, e);
             }
         } else {
-            final var startsFromLower = name.startsWith((name.charAt(0) + "").toLowerCase());
-            if (startsFromLower) {
-                return new HtmlComponent(name);
-            } else {
-                throw new UnknownTypeException("Unknown type: " + name);
-            }
+            return generateUndefinedComponent(name);
         }
+    }
+
+    private Component generateUndefinedComponent(String name) {
+        if (Text.class.getName().equals(name) || Text.class.getSimpleName().equals(name)) {
+            return new Text("");
+        }
+
+        // Simple HTML tag
+        if (name.startsWith((name.charAt(0) + "").toLowerCase())) {
+            return new HtmlContainer(name);
+        }
+
+        throw new UnknownTypeException("Unknown type: " + name);
     }
 
     public void initialize(Component component, String property, String value) {

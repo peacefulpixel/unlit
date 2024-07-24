@@ -7,8 +7,8 @@ import me.ppixel.unlit.annotation.MapMarkup;
 import me.ppixel.unlit.annotation.MarkupField;
 import me.ppixel.unlit.exception.InvalidSourceException;
 import me.ppixel.unlit.exception.MappingException;
-import me.ppixel.unlit.parser.UnlitXmlParser;
 import me.ppixel.unlit.parser.UnlitXMLElement;
+import me.ppixel.unlit.parser.UnlitXmlParser;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
