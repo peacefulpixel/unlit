@@ -3,13 +3,18 @@ package me.ppixel.unlit;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HtmlContainer;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.icon.Icon;
 import me.ppixel.unlit.exception.InvalidTypeException;
 import me.ppixel.unlit.exception.MappingException;
 import me.ppixel.unlit.exception.UnknownTypeException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -44,12 +49,12 @@ public class InstanceGenerator {
     }
 
     public void initialize(Component component, String property, String value) {
-        final var isNumeric = value.matches("^[-+]?[0-9]+(\\.[0-9]+)?$");
+        System.out.println(property + "|" + value + "|");
+
         final var methodName = "set" + StringUtils.capitalize(property);
         final var type = component.getClass();
 
-        boolean isMethodNumeric = false;
-        Method m = null;
+        final var methods = new HashSet<Pair<Class<?>, Method>>();
         for (var method : type.getMethods()) {
             if (!methodName.equals(method.getName()))
                 continue;
@@ -57,37 +62,64 @@ public class InstanceGenerator {
             if (method.getParameterCount() != 1)
                 continue;
 
-            if (method.getParameters()[0].getType().isAssignableFrom(String.class)) {
-                m = method;
-                if (!isNumeric) break;
-            }
-
-            if (Number.class.isAssignableFrom(method.getParameters()[0].getType()) && isNumeric) {
-                m = method;
-                isMethodNumeric = true;
-                break;
-            }
+            methods.add(Pair.of(method.getParameters()[0].getType(), method));
         }
 
-        if (m == null)
+        if (methods.isEmpty())
             throw new MappingException("Unable to find method " + methodName + " in class " + component.getClass());
 
-        final Object val;
-        if (!isMethodNumeric) {
-            val = value;
-        } else {
-            if (value.contains(".")) {
-                val = Double.parseDouble(value);
-            } else {
-                val = Integer.parseInt(value);
-            }
-        }
+        final var match = findMatch(methods, value);
+        final var m = match.getLeft();
+        final var v = ParameterFactory.createParameter(match.getRight(), value);
 
         try {
-            m.invoke(component, val);
+            m.invoke(component, v);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new MappingException(format("Unable to set property \"%s\" with value \"%s\"",
                     property, value), e);
         }
+    }
+
+    private Pair<Method, Class<?>> findMatch(Set<Pair<Class<?>, Method>> methods, String value) {
+        final var paramTypes = getAvailableTypesForValue(value);
+
+        for (Pair<Class<?>, Method> method : methods) {
+            for (Class<?> paramAvailableType : paramTypes) {
+                if (method.getKey().isAssignableFrom(paramAvailableType))
+                    return Pair.of(method.getRight(), paramAvailableType);
+            }
+        }
+
+        throw new UnknownTypeException("Can't find setter for type " +
+                paramTypes.stream()
+                .map(Class::getName)
+                .collect(Collectors.joining(", ")));
+    }
+
+    private Set<Class<?>> getAvailableTypesForValue(String value) {
+
+        if (value.startsWith("#")) {
+            if (value.startsWith("#Double"))     return Set.of(Double.class);
+            if (value.startsWith("#Integer"))    return Set.of(Integer.class);
+            if (value.startsWith("#String"))     return Set.of(String.class);
+            if (value.startsWith("#Icon"))       return Set.of(Icon.class);
+
+            throw new UnknownTypeException(value);
+        }
+
+        final var types = new HashSet<Class<?>>();
+        types.add(String.class);
+
+        if (value.matches("^[-+]?[0-9]+(\\.[0-9]+)?$")) {
+            types.add(Double.class);
+
+            if (!value.contains("."))
+                types.add(Integer.class);
+        }
+
+        if (value.matches("^[a-z-]+:[a-z-]+$"))
+            types.add(Icon.class);
+
+        return types;
     }
 }
