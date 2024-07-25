@@ -78,6 +78,14 @@ cast. So if you're using something like an `IntegerField`, you can do this:
     <IntegerField style="width:100%" _value="100" />
 </VerticalLayout>
 ```
+The table of supported types:
+
+| Java type | Regex pattern              | Example            |
+|-----------|----------------------------|--------------------|
+| String    | `.*`                       | Hello              |
+| Integer   | `^[-+]?[0-9]+$`            | 123                |
+| Double    | `^[-+]?[0-9]+(\.[0-9]+)?$` | 1.23               |
+| Icon      | `^[a-z-]+:[a-z-]+$`        | vaadin:circle-thin |
 
 ### Component classes
 After you created a template, you also need to create a Java class to map that on. Mapped classes typically looks like 
@@ -99,3 +107,13 @@ public class MyComponent extends MappedComponent {
 - `@MarkupField` - work similar to the `@Id` from Vaadin. It searches the element of your template by attribute `id`.
   Note, that it doesn't use DOM or actual HTML element tree that you see in your browser, but simply searches for
   component you defined in template with corresponding `id`.
+
+### Advanced features
+#### Using different types in setters
+Unlit provides you a feature to explicitly assign type for your parameter with the `#` prefix:
+```XML
+<IntegerField _value="#Integer 1" />
+<TextField _value="#String 1" />
+```
+Usually, it's not needed, but if you have a custom component where you have two setters with same name, but different
+parameter type, here it goes.
