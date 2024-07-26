@@ -103,10 +103,11 @@ public class MyComponent extends MappedComponent {
   avoid this, because element should be instanced with its component parent, and can't be changed during runtime. So we
   simply add whatever you defined in your XML template to this component.
 - `MappedComponent` - is a parent class, that is required to extend, because it performs mapping within its constructor. 
-- `@MapMarkup` - this annotation explicitly saying the path of your XML template.
-- `@MarkupField` - work similar to the `@Id` from Vaadin. It searches the element of your template by attribute `id`.
-  Note, that it doesn't use DOM or actual HTML element tree that you see in your browser, but simply searches for
-  component you defined in template with corresponding `id`.
+- `@MapMarkup` - this annotation explicitly saying the path of your XML template. If your MappedComponent isn't
+  annotated with it, Unlit will use the class name determinate the path (like `/MyComponent.xml`).  
+- `@MarkupField` - work same as `@Id` from Vaadin. It searches the element of your template by attribute `id`. Note, 
+  that it doesn't use DOM or actual HTML element tree that you see in your browser, but simply searches for component 
+  you defined in template with corresponding `id`.
 
 ### Advanced features
 #### Using different types in setters
@@ -117,6 +118,7 @@ Unlit provides you a feature to explicitly assign type for your parameter with t
 ```
 Usually, it's not needed, but if you have a custom component where you have two setters with same name, but different
 parameter type, here it goes.
+
 #### Slots
 You can set slots for your component from the XML template.
 ```XML
@@ -127,3 +129,35 @@ You can set slots for your component from the XML template.
 ```
 You may notice that Button isn't a container, so it couldn't have any children. That's correct so Unlit not even tries
 to add it inside. Although, if component **is a container**, the slotted item will be added as a child.
+
+#### Using @Id instead of @MarkupField
+You can replace @MarkupField to `com.vaadin.flow.component.template.Id` if you prefer. Also, the parameter `value` isn't
+required, so if you leave it blank, the field name will be used instead.
+```Java
+@Tag("div")
+@MapMarkup("/my-component.xml")
+public class MyComponent extends MappedComponent {
+    @MarkupField("login") private TextField tfLogin;
+    @MarkupField          private PasswordField password;
+    @Id("go")             private Button btnLogin;
+}
+```
+
+#### Define template folder
+You can define the template folder in your resources path with a JVM property `me.ppixel.unlit.template-dir`. It's also
+fine if you do so before you started a Vaadin APP, but also works at runtime:
+```Java
+public static void main(String[] args) {
+    System.setProperty("me.ppixel.unlit.template-dir", "/templates");
+    SpringApplication.run(Application.class, args);
+}
+```
+If you apply the code above, the annotation below will point to */templates/my-component.xml*
+```Java
+@Tag("div")
+@MapMarkup("/my-component.xml")
+public class MyComponent extends MappedComponent {
+}
+```
+It works the same way without `@MapMarkup` annotation, so if you remove it, the path will be 
+*/templates/MyComponent.xml*.

@@ -19,5 +19,5 @@ public @interface MarkupField {
     /**
      * @return the identifier of a template field
      */
-    String value();
+    String value() default "";
 }
