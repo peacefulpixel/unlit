@@ -80,12 +80,13 @@ cast. So if you're using something like an `IntegerField`, you can do this:
 ```
 The table of supported types:
 
-| Java type | Regex pattern              | Example            |
-|-----------|----------------------------|--------------------|
-| String    | `.*`                       | Hello              |
-| Integer   | `^[-+]?[0-9]+$`            | 123                |
-| Double    | `^[-+]?[0-9]+(\.[0-9]+)?$` | 1.23               |
-| Icon      | `^[a-z-]+:[a-z-]+$`        | vaadin:circle-thin |
+| Java type | Regex pattern                  | Example            |
+|-----------|--------------------------------|--------------------|
+| String    | `.*`                           | Hello              |
+| Integer   | `^[-+]?[0-9]+$`                | 123                |
+| Double    | `^[-+]?[0-9]+(\.[0-9]+)?$`     | 1.23               |
+| Boolean   | `^(true\|TRUE\|false\|FALSE)$` | true               |
+| Icon      | `^[a-z-]+:[a-z-]+$`            | vaadin:circle-thin |
 
 ### Component classes
 After you created a template, you also need to create a Java class to map that on. Mapped classes typically looks like 
@@ -128,7 +129,7 @@ You can set slots for your component from the XML template.
 </Button>
 ```
 You may notice that Button isn't a container, so it couldn't have any children. That's correct so Unlit not even tries
-to add it inside. Although, if component **is a container**, the slotted item will be added as a child.
+to add it inside in this case.
 
 #### Using @Id instead of @MarkupField
 You can replace @MarkupField to `com.vaadin.flow.component.template.Id` if you prefer. Also, the parameter `value` isn't
@@ -161,3 +162,26 @@ public class MyComponent extends MappedComponent {
 ```
 It works the same way without `@MapMarkup` annotation, so if you remove it, the path will be 
 */templates/MyComponent.xml*.
+
+#### AppLayout handling
+Unlit handles AppLayout children differently, because it doesn't extend HasComponents. Basically, everything you define
+that is not slotted, will be added to the `div` which will be added through `setContent`. The following code:
+```XML
+<AppLayout>
+  <H1 slot="navbar">
+    My Title
+  </H1>
+  <Div>Content #1</Div>
+  <Div>Content #2</Div>
+</AppLayout>
+```
+Is equal to:
+```Java
+final AppLayout layout = new AppLayout();
+SlotUtils.addToSlot(layout, "navbar", new H1("My Title"));
+final Div content1 = new Div();
+content1.add("Content #1");
+final Div content2 = new Div();
+content2.add("Content #2");
+layout.setContent(new Div(content1, content2));
+```

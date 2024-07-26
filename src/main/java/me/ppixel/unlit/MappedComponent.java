@@ -4,6 +4,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.template.Id;
 import me.ppixel.unlit.annotation.MapMarkup;
@@ -20,6 +22,7 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -78,26 +81,11 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
     private Component createComponentTree(UnlitXMLElement element) {
         final Component c = instanceGenerator.generate(element.type);
         element.parameters.forEach((k, v) -> handleParameter(c, k, v));
-        element.children.forEach(ch -> {
-            final var chAsComp = createComponentTree(ch);
-            boolean slotted = ch.parameters.containsKey("slot");
-            if (slotted) {
-                SlotUtils.addToSlot(c, ch.parameters.get("slot"), chAsComp);
-            }
 
-            if (c instanceof HasComponents hasComponents) {
-                hasComponents.add(chAsComp);
-            } else {
-                // Ignoring Text instance here, because they're usually empty strings or newlines from parsed XML file.
-                // Also, it doesn't make a lot of sense to throw an exception when someone just left pure text inside of
-                // XML tag.
-                if (!slotted && !(chAsComp instanceof Text)) {
-                    throw new MappingException(String.format("Unable to add child %s to parent %s, because parent's " +
-                            "class doesn't implementing HasComponents or child is not slotted",
-                            chAsComp.getClass(), c.getClass()));
-                }
-            }
-        });
+        if (c instanceof AppLayout a)
+            handleChildrenForAppLayout(a, element.children);
+        else
+            handleChildrenForComponent(c, element.children);
 
         return c;
     }
@@ -117,6 +105,40 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
             childrenWithIds.put(v, c);
 
         c.getElement().setAttribute(k, v);
+    }
+
+    private void handleChildrenForComponent(Component c, List<UnlitXMLElement> children) {
+        for (UnlitXMLElement ch : children) {
+            final var chAsComp = createComponentTree(ch);
+            if (ch.parameters.containsKey("slot")) {
+                SlotUtils.addToSlot(c, ch.parameters.get("slot"), chAsComp);
+            } else if (c instanceof HasComponents hasComponents) {
+                hasComponents.add(chAsComp);
+            } else {
+                // Ignoring Text instance here, because they're usually empty strings or newlines from parsed XML file.
+                // Also, it doesn't make a lot of sense to throw an exception when someone just left pure text inside of
+                // XML tag.
+                if (!(chAsComp instanceof Text)) {
+                    throw new MappingException(String.format("Unable to add child %s to parent %s, because parent's " +
+                                    "class doesn't implementing HasComponents or child is not slotted",
+                            chAsComp.getClass(), c.getClass()));
+                }
+            }
+        }
+    }
+
+    private void handleChildrenForAppLayout(AppLayout c, List<UnlitXMLElement> children) {
+        final Div content = new Div();
+        c.setContent(content);
+
+        for (UnlitXMLElement ch : children) {
+            final var chAsComp = createComponentTree(ch);
+            if (ch.parameters.containsKey("slot")) {
+                SlotUtils.addToSlot(c, ch.parameters.get("slot"), chAsComp);
+            } else {
+                content.add(chAsComp);
+            }
+        }
     }
 
     private void injectFields() {
