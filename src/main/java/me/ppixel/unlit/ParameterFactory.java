@@ -13,6 +13,7 @@ public class ParameterFactory {
         if (String.class.equals(type))     return rawParameter;
         if (Double.class.equals(type))     return createDouble(rawParameter);
         if (Integer.class.equals(type))    return createInteger(rawParameter);
+        if (Boolean.class.equals(type))    return createBoolean(rawParameter);
         if (Icon.class.equals(type))       return createIcon(rawParameter);
 
         throw new UnknownTypeException("Unsupported type for parameter: " + type.getName());
@@ -24,6 +25,10 @@ public class ParameterFactory {
 
     private static Integer createInteger(String raw) {
         return Integer.parseInt(raw);
+    }
+
+    private static Boolean createBoolean(String raw) {
+        return Boolean.parseBoolean(raw);
     }
 
     private static Icon createIcon(String raw) {

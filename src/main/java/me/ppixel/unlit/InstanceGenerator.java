@@ -7,6 +7,7 @@ import com.vaadin.flow.component.icon.Icon;
 import me.ppixel.unlit.exception.InvalidTypeException;
 import me.ppixel.unlit.exception.MappingException;
 import me.ppixel.unlit.exception.UnknownTypeException;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -83,7 +84,9 @@ public class InstanceGenerator {
 
         for (Pair<Class<?>, Method> method : methods) {
             for (Class<?> paramAvailableType : paramTypes) {
-                if (method.getKey().isAssignableFrom(paramAvailableType))
+                var type = method.getKey();
+                type = type.isPrimitive() ? ClassUtils.primitiveToWrapper(type) : type;
+                if (type.isAssignableFrom(paramAvailableType))
                     return Pair.of(method.getRight(), paramAvailableType);
             }
         }
@@ -91,7 +94,7 @@ public class InstanceGenerator {
         throw new UnknownTypeException("Can't find setter for type " +
                 paramTypes.stream()
                 .map(Class::getName)
-                .collect(Collectors.joining(", ")));
+                .collect(Collectors.joining(", ")) + " (value " + value + ")");
     }
 
     private Set<Class<?>> getAvailableTypesForValue(String value) {
@@ -99,6 +102,7 @@ public class InstanceGenerator {
         if (value.startsWith("#")) {
             if (value.startsWith("#Double"))     return Set.of(Double.class);
             if (value.startsWith("#Integer"))    return Set.of(Integer.class);
+            if (value.startsWith("#Boolean"))    return Set.of(Boolean.class);
             if (value.startsWith("#String"))     return Set.of(String.class);
             if (value.startsWith("#Icon"))       return Set.of(Icon.class);
 
@@ -114,6 +118,9 @@ public class InstanceGenerator {
             if (!value.contains("."))
                 types.add(Integer.class);
         }
+
+        if (value.matches("^(true|TRUE|false|FALSE)$"))
+            types.add(Boolean.class);
 
         if (value.matches("^[a-z-]+:[a-z-]+$"))
             types.add(Icon.class);
