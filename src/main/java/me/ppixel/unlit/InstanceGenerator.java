@@ -49,8 +49,6 @@ public class InstanceGenerator {
     }
 
     public void initialize(Component component, String property, String value) {
-        System.out.println(property + "|" + value + "|");
-
         final var methodName = "set" + StringUtils.capitalize(property);
         final var type = component.getClass();
 

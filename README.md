@@ -117,3 +117,13 @@ Unlit provides you a feature to explicitly assign type for your parameter with t
 ```
 Usually, it's not needed, but if you have a custom component where you have two setters with same name, but different
 parameter type, here it goes.
+#### Slots
+You can set slots for your component from the XML template.
+```XML
+<Button id="someBtn" _text="Slot Test">
+  <p slot="prefix">PFX</p>
+  <p slot="suffix">SFX</p>
+</Button>
+```
+You may notice that Button isn't a container, so it couldn't have any children. That's correct so Unlit not even tries
+to add it inside. Although, if component **is a container**, the slotted item will be added as a child.

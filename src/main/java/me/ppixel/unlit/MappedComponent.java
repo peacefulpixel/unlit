@@ -3,6 +3,8 @@ package me.ppixel.unlit;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.shared.SlotUtils;
 import me.ppixel.unlit.annotation.MapMarkup;
 import me.ppixel.unlit.annotation.MarkupField;
 import me.ppixel.unlit.exception.InvalidSourceException;
@@ -59,11 +61,23 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
         final Component c = instanceGenerator.generate(element.type);
         element.parameters.forEach((k, v) -> handleParameter(c, k, v));
         element.children.forEach(ch -> {
+            final var chAsComp = createComponentTree(ch);
+            boolean slotted = ch.parameters.containsKey("slot");
+            if (slotted) {
+                SlotUtils.addToSlot(c, ch.parameters.get("slot"), chAsComp);
+            }
+
             if (c instanceof HasComponents hasComponents) {
-                hasComponents.add(createComponentTree(ch));
+                hasComponents.add(chAsComp);
             } else {
-                // TODO: Do
-                System.out.println("Child is unputtalbe");
+                // Ignoring Text instance here, because they're usually empty strings or newlines from parsed XML file.
+                // Also, it doesn't make a lot of sense to throw an exception when someone just left pure text inside of
+                // XML tag.
+                if (!slotted && !(chAsComp instanceof Text)) {
+                    throw new MappingException(String.format("Unable to add child %s to parent %s, because parent's " +
+                            "class doesn't implementing HasComponents or child is not slotted",
+                            chAsComp.getClass(), c.getClass()));
+                }
             }
         });
 
