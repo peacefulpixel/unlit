@@ -3,11 +3,12 @@ package me.ppixel.unlit;
 import com.vaadin.flow.component.icon.Icon;
 import me.ppixel.unlit.exception.InvalidTypeException;
 import me.ppixel.unlit.exception.UnknownTypeException;
+import org.apache.commons.lang3.StringUtils;
 
 public class ParameterFactory {
 
     public static Object createParameter(Class<?> type, String rawParameter) {
-        if (rawParameter.startsWith("#"))
+        if (StringUtils.startsWith(rawParameter, "#"))
             rawParameter = rawParameter.replaceAll("^#[a-zA-Z]+ ", "");
 
         if (String.class.equals(type))     return rawParameter;
@@ -16,7 +17,7 @@ public class ParameterFactory {
         if (Boolean.class.equals(type))    return createBoolean(rawParameter);
         if (Icon.class.equals(type))       return createIcon(rawParameter);
 
-        throw new UnknownTypeException("Unsupported type for parameter: " + type.getName());
+        throw new UnknownTypeException("Unsupported type for parameter: " + type);
     }
 
     private static Double createDouble(String raw) {
@@ -24,11 +25,11 @@ public class ParameterFactory {
     }
 
     private static Integer createInteger(String raw) {
-        return Integer.parseInt(raw);
+        return Integer.parseInt(raw.trim());
     }
 
     private static Boolean createBoolean(String raw) {
-        return Boolean.parseBoolean(raw);
+        return Boolean.parseBoolean(raw.trim());
     }
 
     private static Icon createIcon(String raw) {
