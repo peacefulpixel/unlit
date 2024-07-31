@@ -14,10 +14,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 
-public class UnlitXmlParser {
+public class UnlitXMLParser {
     private final String source;
 
-    public UnlitXmlParser(String source) {
+    public UnlitXMLParser(String source) {
         this.source = source;
     }
 
@@ -60,10 +60,11 @@ public class UnlitXmlParser {
 
     private void processTextNode(UnlitXMLElement parent, Node node) {
         final var value = node.getTextContent()
-                .replaceAll("^\n*", "")
-                .replaceAll("\n*$", "");
+                .replaceAll("^\n*", "")     // Newlines at beginning
+                .replaceAll("\n*$", "")     // Newlines at the end
+                .replaceAll("\n\\s*$", ""); // Empty lines
 
-        if (value.isEmpty())
+        if (value.isEmpty() || value.matches("^\\s*$"))
             return;
 
         final var text = new UnlitXMLElement();

@@ -13,7 +13,7 @@ import me.ppixel.unlit.annotation.MarkupField;
 import me.ppixel.unlit.exception.InvalidSourceException;
 import me.ppixel.unlit.exception.MappingException;
 import me.ppixel.unlit.parser.UnlitXMLElement;
-import me.ppixel.unlit.parser.UnlitXmlParser;
+import me.ppixel.unlit.parser.UnlitXMLParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -70,7 +70,7 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
             throw new InvalidSourceException("Source " + filePath + " doesn't exists", e);
         }
 
-        final var parser = new UnlitXmlParser(resource);
+        final var parser = new UnlitXMLParser(resource);
         final var root = parser.parse();
         final var comp = createComponentTree(root);
 
