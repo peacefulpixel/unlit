@@ -22,6 +22,20 @@ straightforward and simple solution, which doesn't have any complicated architec
 
 *Also, Unlit doesn't use Spring to avoid implicity for you.*
 
+## Installation
+Maven:
+```XML
+<dependency>
+  <groupId>me.ppixel</groupId>
+  <artifactId>unlit</artifactId>
+  <version>1.9</version>
+</dependency>
+```
+Gradle:
+```Groovy
+implementation 'me.ppixel:unlit:1.9'
+```
+
 ## Get started
 You can get started just here, and there's (should be) no need to google anything else.
 
