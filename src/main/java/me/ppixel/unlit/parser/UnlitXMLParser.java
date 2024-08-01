@@ -6,8 +6,10 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -77,6 +79,21 @@ public class UnlitXMLParser {
         try {
             final var factory = DocumentBuilderFactory.newInstance();
             final var builder = factory.newDocumentBuilder();
+            builder.setErrorHandler(new ErrorHandler() {
+                @Override
+                public void warning(SAXParseException exception) throws SAXException {
+                }
+
+                @Override
+                public void error(SAXParseException exception) throws SAXException {
+                    throw new InvalidSourceException("Parsing error occurred", exception);
+                }
+
+                @Override
+                public void fatalError(SAXParseException exception) throws SAXException {
+                    throw new InvalidSourceException("Fatal parsing error occurred", exception);
+                }
+            });
             return builder.parse(new InputSource(new StringReader(source)));
         } catch (ParserConfigurationException | IOException | SAXException e) {
             throw new InvalidSourceException("Unable to parse source: " + source, e);
