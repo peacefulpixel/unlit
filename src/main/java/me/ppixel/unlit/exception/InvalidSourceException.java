@@ -1,5 +1,6 @@
 package me.ppixel.unlit.exception;
 
+// TODO: Doc
 public class InvalidSourceException extends RuntimeException {
 
     public InvalidSourceException() {

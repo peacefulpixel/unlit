@@ -10,8 +10,8 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.template.Id;
 import me.ppixel.unlit.annotation.MapMarkup;
 import me.ppixel.unlit.annotation.MarkupField;
-import me.ppixel.unlit.exception.InvalidSourceException;
 import me.ppixel.unlit.exception.MappingException;
+import me.ppixel.unlit.exception.NoSuchSourceException;
 import me.ppixel.unlit.parser.UnlitXMLElement;
 import me.ppixel.unlit.parser.UnlitXMLParser;
 import org.apache.commons.io.IOUtils;
@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -44,6 +41,10 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
      * @throws ClassCastException when can't cast a template element to specified type <T>
      */
     protected <T extends Component> T getComponentById(String id) {
+        if (!childrenWithIds.containsKey(id)) {
+            throw new NoSuchElementException("No component with id " + id + " was loaded");
+        }
+
         return (T) childrenWithIds.get(id);
     }
 
@@ -52,7 +53,7 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
      */
     protected String getPathToTemplate() {
         final var t = this.getClass();
-        final var resource = Optional.ofNullable(t.getAnnotation(MapMarkup.class))
+        final var resource = Optional.ofNullable(getAnnotationOrNull())
                 .map(MapMarkup::value)
                 .orElseGet(() -> t.getSimpleName() + ".xml");
 
@@ -62,12 +63,24 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
         return Path.of("/", resourceDir, resource).toString();
     }
 
+    private MapMarkup getAnnotationOrNull() {
+        Class<?> t = this.getClass();
+        while (t != null) {
+            final var res = t.getAnnotation(MapMarkup.class);
+            if (res != null) return res;
+
+            t = t.getSuperclass();
+        }
+
+        return null;
+    }
+
     private void init(String filePath) {
         final String resource;
         try {
             resource = IOUtils.resourceToString(filePath, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new InvalidSourceException("Source " + filePath + " doesn't exists", e);
+            throw new NoSuchSourceException("Source " + filePath + " doesn't exists", e);
         }
 
         final var parser = new UnlitXMLParser(resource);
