@@ -1,5 +1,6 @@
 package me.ppixel.unlit.exception;
 
+// TODO: Doc
 public class MappingException extends RuntimeException {
     public MappingException() {
     }

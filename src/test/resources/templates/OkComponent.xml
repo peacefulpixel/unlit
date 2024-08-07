@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<VerticalLayout _width="100%">
+    <Button id="btn1" _text="Hello!" />
+    <HorizontalLayout>
+        <TextField id="tf1"></TextField>
+        <TextField id="tf2"/>
+    </HorizontalLayout>
+</VerticalLayout>

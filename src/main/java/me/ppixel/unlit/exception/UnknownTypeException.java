@@ -1,5 +1,6 @@
 package me.ppixel.unlit.exception;
 
+// TODO: Doc
 public class UnknownTypeException extends RuntimeException {
     public UnknownTypeException() {
     }
