@@ -1,6 +1,13 @@
 package me.ppixel.unlit.exception;
 
-// TODO: Doc
+/**
+ * Component type processing exception.<br>
+ * Usually happens when the type doesn't have required constructor or its value definition is wrong (like invalid syntax
+ * of vaadin icon).
+ * <br>
+ * All the exception constructors are directly froward to the RuntimeException ones
+ * @see <a href="https://github.com/peacefulpixel/unlit/tree/master>Official README</a>
+ */
 public class InvalidTypeException extends RuntimeException {
     public InvalidTypeException() {
     }
