@@ -105,4 +105,15 @@ public class MappedComponentTest {
             @MarkupField("tf2") private TextField textField2;
         });
     }
+
+    @Test
+    public void testHierarchicalInjecting() {
+        final var comp = new OkComponentChildChild();
+
+        assertNotNull(comp.textField1);
+        assertNotNull(comp.textField2);
+        assertNotNull(comp.textField3);
+        assertSame(comp.textField2, comp.textField3); // Reference should be exactly same (not just equals)
+        assertNotSame(comp.textField2, comp.textField1);
+    }
 }

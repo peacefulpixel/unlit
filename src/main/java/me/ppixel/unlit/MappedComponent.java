@@ -22,6 +22,8 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -155,7 +157,11 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
     }
 
     private void injectFields() {
-        final var failedFields = Stream.of(this.getClass().getDeclaredFields())
+        final var failedFields = getAllClassesOfThisType().stream()
+                .mapMulti((BiConsumer<? super Class<?>, ? super Consumer<Field>>) (clazz, c) -> {
+                    for (Field f : clazz.getDeclaredFields())
+                        c.accept(f);
+                })
                 .filter(f -> f.isAnnotationPresent(MarkupField.class) || f.isAnnotationPresent(Id.class))
                 .filter(f -> {
                     final var v = Optional.ofNullable(f.getAnnotation(MarkupField.class))
@@ -184,5 +190,15 @@ public abstract class MappedComponent extends Component implements HasStyle, Has
         if (!failedFields.isEmpty()) {
             throw new MappingException("Unable to map following fields: " + String.join(", ", failedFields));
         }
+    }
+
+    private Set<Class<?>> getAllClassesOfThisType() {
+        final var set = new HashSet<Class<?>>();
+
+        Class<?> c = this.getClass();
+        do set.add(c);
+        while ((c = c.getSuperclass()) != null);
+
+        return set;
     }
 }
