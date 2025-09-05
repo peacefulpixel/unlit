@@ -1,9 +1,6 @@
 package me.ppixel.unlit;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -24,11 +21,10 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
-public abstract class MappedComponent extends Component implements HasStyle, HasComponents {
+public abstract class MappedComponent extends Component implements HasStyle, HasComponents, HasSize {
     private final InstanceGenerator instanceGenerator = new InstanceGenerator();
     private final Map<String, Component> childrenWithIds = new HashMap<>();
 
